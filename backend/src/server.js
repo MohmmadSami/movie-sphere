@@ -19,16 +19,16 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 /* =========================
-   DATABASE (SAFE FOR VERCEL)
+   DATABASE (SERVERLESS SAFE)
 ========================= */
 let isConnected = false;
 
-async function dbConnect() {
+const dbConnect = async () => {
   if (!isConnected) {
     await connectDB();
     isConnected = true;
   }
-}
+};
 
 /* =========================
    MIDDLEWARE
@@ -45,48 +45,83 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* =========================
+   FAVICON (PREVENT 404 LOGS)
+========================= */
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+/* =========================
    ROOT
 ========================= */
 app.get('/', async (req, res) => {
-  await dbConnect();
-  res.status(200).json({
-    success: true,
-    message: '🎬 MovieSphere API running on Vercel',
-    version: '1.0.0',
-  });
+  try {
+    await dbConnect();
+    res.status(200).json({
+      success: true,
+      message: '🎬 MovieSphere API running on Vercel',
+      version: '1.0.0',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 /* =========================
-   API ROUTES
+   API ROUTES (DB SAFE)
 ========================= */
 app.use('/api/auth', async (req, res, next) => {
   await dbConnect();
   next();
 }, authRoutes);
 
-app.use('/api/movies', moviesRoutes);
-app.use('/api/watchlist', watchlistRoutes);
-app.use('/api/favorites', favoritesRoutes);
-app.use('/api/reviews', reviewsRoutes);
-app.use('/api/history', historyRoutes);
+app.use('/api/movies', async (req, res, next) => {
+  await dbConnect();
+  next();
+}, moviesRoutes);
+
+app.use('/api/watchlist', async (req, res, next) => {
+  await dbConnect();
+  next();
+}, watchlistRoutes);
+
+app.use('/api/favorites', async (req, res, next) => {
+  await dbConnect();
+  next();
+}, favoritesRoutes);
+
+app.use('/api/reviews', async (req, res, next) => {
+  await dbConnect();
+  next();
+}, reviewsRoutes);
+
+app.use('/api/history', async (req, res, next) => {
+  await dbConnect();
+  next();
+}, historyRoutes);
 
 /* =========================
    HEALTH
 ========================= */
 app.get('/health', async (req, res) => {
-  await dbConnect();
-  res.json({
-    success: true,
-    message: 'MovieSphere API is healthy',
-    time: new Date(),
-  });
+  try {
+    await dbConnect();
+    res.json({
+      success: true,
+      message: 'MovieSphere API is healthy',
+      timestamp: new Date(),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 /* =========================
    404
 ========================= */
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+  });
 });
 
 /* =========================
@@ -95,6 +130,6 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 /* =========================
-   EXPORT
+   EXPORT (NO LISTEN)
 ========================= */
 module.exports = app;
