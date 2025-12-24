@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:io' show Platform;
 import 'package:movie_sphere/core/constants/constants.dart';
 import 'package:movie_sphere/core/theme/app_theme.dart';
 import 'package:movie_sphere/presentation/providers/auth_provider.dart';

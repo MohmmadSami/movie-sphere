@@ -362,4 +362,3 @@ For issues or questions, please create an issue in the repository.
 ---
 
 **Built with ❤️ using Flutter 3.x**
-
