@@ -1,8 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
 
 // Database
 const connectDB = require('./config/database');
@@ -27,19 +25,11 @@ const app = express();
 connectDB();
 
 /* =========================
-   UPLOADS (TEMP ON VERCEL)
-========================= */
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-/* =========================
    MIDDLEWARE
 ========================= */
 app.use(
   cors({
-    origin: '*', // ✅ allow Flutter, web, mobile
+    origin: '*', // ✅ allow Flutter, Web, Mobile
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -48,7 +38,6 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 /* =========================
    ROOT
