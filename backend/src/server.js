@@ -16,21 +16,26 @@ const historyRoutes = require('./routes/history');
 // Middleware
 const errorHandler = require('./middleware/errorHandler');
 
-// Initialize app
 const app = express();
 
 /* =========================
-   DATABASE CONNECTION
+   DATABASE (SAFE FOR VERCEL)
 ========================= */
-connectDB();
+let isConnected = false;
+
+async function dbConnect() {
+  if (!isConnected) {
+    await connectDB();
+    isConnected = true;
+  }
+}
 
 /* =========================
    MIDDLEWARE
 ========================= */
 app.use(
   cors({
-    origin: '*', // ✅ allow Flutter, Web, Mobile
-    credentials: true,
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
@@ -42,27 +47,23 @@ app.use(express.urlencoded({ extended: true }));
 /* =========================
    ROOT
 ========================= */
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  await dbConnect();
   res.status(200).json({
     success: true,
     message: '🎬 MovieSphere API running on Vercel',
     version: '1.0.0',
-    endpoints: {
-      health: '/health',
-      auth: '/api/auth',
-      movies: '/api/movies',
-      watchlist: '/api/watchlist',
-      favorites: '/api/favorites',
-      reviews: '/api/reviews',
-      history: '/api/history',
-    },
   });
 });
 
 /* =========================
    API ROUTES
 ========================= */
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', async (req, res, next) => {
+  await dbConnect();
+  next();
+}, authRoutes);
+
 app.use('/api/movies', moviesRoutes);
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/favorites', favoritesRoutes);
@@ -70,24 +71,22 @@ app.use('/api/reviews', reviewsRoutes);
 app.use('/api/history', historyRoutes);
 
 /* =========================
-   HEALTH CHECK
+   HEALTH
 ========================= */
-app.get('/health', (req, res) => {
-  res.status(200).json({
+app.get('/health', async (req, res) => {
+  await dbConnect();
+  res.json({
     success: true,
     message: 'MovieSphere API is healthy',
-    timestamp: new Date(),
+    time: new Date(),
   });
 });
 
 /* =========================
-   404 HANDLER
+   404
 ========================= */
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
-  });
+  res.status(404).json({ success: false, message: 'Route not found' });
 });
 
 /* =========================
@@ -96,6 +95,6 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 /* =========================
-   EXPORT (NO listen)
+   EXPORT
 ========================= */
 module.exports = app;
