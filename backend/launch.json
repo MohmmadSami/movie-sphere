@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "MovieSphere (Production)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=TMDB_API_KEY=your_tmdb_key_here"
+            ]
+        },
+        {
+            "name": "MovieSphere (Localhost)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=API_BASE_URL=http://localhost:5000/api",
+                "--dart-define=TMDB_API_KEY=your_tmdb_key_here"
+            ]
+        }
+    ]
+}
