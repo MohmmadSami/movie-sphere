@@ -15,6 +15,7 @@ import 'package:movie_sphere/presentation/screens/profile_screen.dart';
 import 'package:movie_sphere/presentation/screens/settings_screen.dart';
 import 'package:movie_sphere/presentation/screens/popular_screen.dart';
 import 'package:movie_sphere/presentation/screens/upcoming_screen.dart';
+import 'package:movie_sphere/splash_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MovieSphereApp()));
@@ -40,8 +41,12 @@ class MovieSphereApp extends ConsumerWidget {
 
   GoRouter _getRouterConfig(bool isAuthenticated) {
     return GoRouter(
-      initialLocation: isAuthenticated ? '/home' : '/login',
+      initialLocation: '/splash',
       routes: [
+        GoRoute(
+          path: '/splash',
+          builder: (context, state) => const SplashScreen(),
+        ),
         // Auth Routes
         GoRoute(
           path: '/login',
@@ -87,6 +92,14 @@ class MovieSphereApp extends ConsumerWidget {
         GoRoute(
           path: '/settings',
           builder: (context, state) => const SettingsScreenFull(),
+        ),
+        GoRoute(
+          path: '/content',
+          builder: (context, state) {
+            final title = state.uri.queryParameters['title'] ?? '';
+            final body = state.uri.queryParameters['body'] ?? '';
+            return StaticContentScreen(title: title, body: body);
+          },
         ),
       ],
     );

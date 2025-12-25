@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:movie_sphere/core/constants/constants.dart';
 import 'package:movie_sphere/presentation/providers/theme_provider.dart';
 
@@ -123,26 +124,18 @@ class SettingsScreenFull extends ConsumerWidget {
           _SettingsTile(
             icon: Icons.privacy_tip,
             title: AppStrings.privacyPolicy,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Privacy Policy - Coming soon'),
-                ),
-              );
-            },
+            onTap: () => context.push(
+              '/content?title=Privacy Policy&body=${Uri.encodeComponent(_privacyPolicyText)}',
+            ),
           ),
           const SizedBox(height: 8),
 
           _SettingsTile(
             icon: Icons.description,
             title: AppStrings.termsOfService,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Terms of Service - Coming soon'),
-                ),
-              );
-            },
+            onTap: () => context.push(
+              '/content?title=Terms of Service&body=${Uri.encodeComponent(_termsText)}',
+            ),
           ),
 
           const SizedBox(height: 32),
@@ -157,42 +150,43 @@ class SettingsScreenFull extends ConsumerWidget {
           _SettingsTile(
             icon: Icons.help,
             title: 'Help & Feedback',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Help & Feedback - Coming soon'),
-                ),
-              );
-            },
+            onTap: () => _showDialog(context, 'Help & Feedback',
+                'For support, please contact us at:\nsupport@moviesphere.com'),
           ),
           const SizedBox(height: 8),
 
           _SettingsTile(
             icon: Icons.star,
             title: 'Rate App',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Opening app store - Coming soon'),
-                ),
-              );
-            },
+            onTap: () => _showDialog(context, 'Rate App',
+                'Thank you for rating us 5 stars on the Store!'),
           ),
           const SizedBox(height: 8),
 
           _SettingsTile(
             icon: Icons.bug_report,
             title: 'Report Bug',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Bug report - Coming soon'),
-                ),
-              );
-            },
+            onTap: () => _showDialog(context, 'Report Bug',
+                'Please describe the bug you found and send it to bugs@moviesphere.com'),
           ),
 
           const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  void _showDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
@@ -225,6 +219,51 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
+
+class StaticContentScreen extends StatelessWidget {
+  final String title;
+  final String body;
+
+  const StaticContentScreen({
+    super.key,
+    required this.title,
+    required this.body,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          body,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ),
+    );
+  }
+}
+
+const String _privacyPolicyText = """
+Privacy Policy
+
+1. Introduction
+Welcome to MovieSphere. We respect your privacy and are committed to protecting your personal data.
+
+2. Data Collection
+We collect minimal data to provide you with the best movie discovery experience. This includes your name, email, and watchlist preferences.
+""";
+
+const String _termsText = """
+Terms of Service
+
+1. Acceptance
+By using MovieSphere, you agree to these terms. Please read them carefully.
+
+2. Usage
+You may not use this app for any illegal or unauthorized purpose.
+""";
 
 class _ThemeOptionButton extends StatelessWidget {
   final String label;
@@ -280,4 +319,3 @@ class _ThemeOptionButton extends StatelessWidget {
     );
   }
 }
-

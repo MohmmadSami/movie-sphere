@@ -139,13 +139,7 @@ class ProfileScreenFull extends ConsumerWidget {
                           child: ElevatedButton.icon(
                             icon: const Icon(Icons.edit),
                             label: const Text(AppStrings.editProfile),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Edit profile - Coming soon'),
-                                ),
-                              );
-                            },
+                            onPressed: () => _showEditProfileDialog(context, ref),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -236,6 +230,50 @@ class ProfileScreenFull extends ConsumerWidget {
             ),
     );
   }
+
+  void _showEditProfileDialog(BuildContext context, WidgetRef ref) {
+    final user = ref.read(authProvider).user;
+    final nameController = TextEditingController(text: user?.name ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Profile'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                prefixIcon: Icon(Icons.person_outline),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              await ref.read(authProvider.notifier).updateProfile(name: nameController.text);
+              
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Profile updated successfully')),
+                );
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StatCard extends StatelessWidget {
@@ -305,4 +343,3 @@ class _ProfileTile extends StatelessWidget {
     );
   }
 }
-

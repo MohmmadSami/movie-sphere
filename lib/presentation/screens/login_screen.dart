@@ -69,21 +69,6 @@ class _LoginScreenFullState extends ConsumerState<LoginScreenFull> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Logo
-                  Icon(
-                    Icons.movie,
-                    size: 64,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppStrings.appName,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 48),
 
                   // Form
                   Form(
@@ -167,7 +152,14 @@ class _LoginScreenFullState extends ConsumerState<LoginScreenFull> {
                       const SizedBox(width: 8),
                       TextButton(
                         onPressed: () => context.push('/register'),
-                        child: Text(AppStrings.signUpHere),
+                        style: TextButton.styleFrom(foregroundColor: Colors.black),
+                        child: Text(
+                          AppStrings.signUpHere,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -180,4 +172,3 @@ class _LoginScreenFullState extends ConsumerState<LoginScreenFull> {
     );
   }
 }
-

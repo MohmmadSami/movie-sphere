@@ -187,7 +187,14 @@ class _RegisterScreenFullState extends ConsumerState<RegisterScreenFull> {
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => context.pop(),
-                    child: Text(AppStrings.signInHere),
+                    style: TextButton.styleFrom(foregroundColor: Colors.black),
+                    child: Text(
+                      AppStrings.signInHere,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -198,4 +205,3 @@ class _RegisterScreenFullState extends ConsumerState<RegisterScreenFull> {
     );
   }
 }
-
