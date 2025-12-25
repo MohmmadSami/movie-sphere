@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:movie_sphere/core/constants/constants.dart';
 import 'package:movie_sphere/core/utils/validation_utils.dart';
 import 'package:movie_sphere/presentation/providers/auth_provider.dart';
+import 'package:movie_sphere/presentation/providers/admin_mode_provider.dart';
+import 'package:movie_sphere/presentation/providers/guest_mode_provider.dart';
 
 class LoginScreenFull extends ConsumerStatefulWidget {
   const LoginScreenFull({Key? key}) : super(key: key);
@@ -39,6 +41,7 @@ class _LoginScreenFullState extends ConsumerState<LoginScreenFull> {
 
     ref.listen(authProvider, (previous, next) {
       if (next.isAuthenticated) {
+        ref.read(guestModeProvider.notifier).state = false;
         context.go('/home');
       } else if (next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -116,6 +119,14 @@ class _LoginScreenFullState extends ConsumerState<LoginScreenFull> {
                           onPressed: authState.isLoading
                               ? null
                               : () {
+                                  if (emailController.text.trim().toLowerCase() == 'admin@gmail.com' &&
+                                      passwordController.text == 'Admin123') {
+                                    ref.read(adminModeProvider.notifier).state = true;
+                                    ref.read(guestModeProvider.notifier).state = false;
+                                    context.go('/home');
+                                    return;
+                                  }
+
                                   if (formKey.currentState?.validate() ?? false) {
                                     ref.read(authProvider.notifier).login(
                                           email: emailController.text,
@@ -162,6 +173,20 @@ class _LoginScreenFullState extends ConsumerState<LoginScreenFull> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      ref.read(adminModeProvider.notifier).state = false;
+                      ref.read(guestModeProvider.notifier).state = true;
+                      context.go('/home');
+                    },
+                    child: const Text(
+                      'Skip for Now',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ],
               ),

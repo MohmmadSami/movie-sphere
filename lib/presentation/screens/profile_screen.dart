@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:movie_sphere/core/constants/constants.dart';
 import 'package:movie_sphere/presentation/providers/auth_provider.dart';
+import 'package:movie_sphere/presentation/providers/admin_mode_provider.dart';
+import 'package:movie_sphere/presentation/providers/guest_mode_provider.dart';
 
 class ProfileScreenFull extends ConsumerWidget {
   const ProfileScreenFull({Key? key}) : super(key: key);
@@ -11,22 +13,40 @@ class ProfileScreenFull extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final isAdmin = ref.watch(adminModeProvider);
+    final isGuest = ref.watch(guestModeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.profile),
+        title: Text(isAdmin ? 'Admin' : AppStrings.profile),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.push('/settings'),
-          ),
+          if ((authState.user != null && !isGuest) || isAdmin)
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => context.push('/settings'),
+            ),
         ],
       ),
-      body: authState.user == null
+      body: (authState.user == null || isGuest) && !isAdmin
           ? Center(
-              child: ElevatedButton(
-                onPressed: () => context.go('/login'),
-                child: const Text('Login'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Please sign up to view your profile'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => context.push('/register'),
+                    child: const Text('Sign Up'),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      ref.read(guestModeProvider.notifier).state = false;
+                      context.go('/login');
+                    },
+                    child: const Text('Log Out'),
+                  ),
+                ],
               ),
             )
           : SingleChildScrollView(
@@ -77,7 +97,7 @@ class ProfileScreenFull extends ConsumerWidget {
 
                         // Name
                         Text(
-                          authState.user?.name ?? 'User',
+                          isAdmin ? 'Admin' : (authState.user?.name ?? 'User'),
                           style:
                               Theme.of(context).textTheme.headlineSmall?.copyWith(
                                     color: Colors.white,
@@ -88,7 +108,7 @@ class ProfileScreenFull extends ConsumerWidget {
 
                         // Email
                         Text(
-                          authState.user?.email ?? 'email@example.com',
+                          isAdmin ? 'Admin@gmail.com' : (authState.user?.email ?? 'email@example.com'),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.white70,
@@ -214,7 +234,11 @@ class ProfileScreenFull extends ConsumerWidget {
                             label: const Text(AppStrings.logout),
                             onPressed: () {
                               ref.read(authProvider.notifier).logout();
-                              context.go('/login');
+                              ref.read(adminModeProvider.notifier).state = false;
+                              ref.read(guestModeProvider.notifier).state = false;
+                              if (context.mounted) {
+                                context.go('/login');
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
